@@ -37,20 +37,60 @@ public class Snake : MonoBehaviour
 
     private void Start()
     {
-        InvokeRepeating("Move", 0.3f, speed);
+        //InvokeRepeating("Move", 0.3f, 0.4f);
+        Time.fixedDeltaTime = speed;
     }
 
     private void Update()
     {
+        Time.fixedDeltaTime = speed;
 
+        //Movement input
+        if (Application.platform == RuntimePlatform.WindowsPlayer || Application.platform == RuntimePlatform.WindowsEditor)
+            InputKeyboard();
+        else if (Application.platform == RuntimePlatform.Android)
+            SwipeDetector.OnSwipe += Swipe;
+    }
+
+    private void FixedUpdate()
+    {
+        Move();
+    }
+
+    void InputKeyboard()
+    {
         if (Input.GetKey(KeyCode.RightArrow))
             dir = Vector2.right;
         else if (Input.GetKey(KeyCode.LeftArrow))
             dir = -Vector2.right;
         else if (Input.GetKey(KeyCode.UpArrow))
             dir = Vector2.up;
-        if (Input.GetKey(KeyCode.DownArrow))
+        else if (Input.GetKey(KeyCode.DownArrow))
             dir = -Vector2.up;
+    }
+
+    void Swipe(SwipeData data)
+    {
+        switch (data.Direction)
+        {
+            case SwipeDirection.Up:
+                dir = Vector2.up;
+                break;
+
+            case SwipeDirection.Down:
+                dir = -Vector2.up;
+                break;
+
+            case SwipeDirection.Left:
+                dir = -Vector2.right;
+                break;
+
+            case SwipeDirection.Right:
+                dir = Vector2.right;
+                break;
+            default:
+                break;
+        }
     }
 
     void Move()
@@ -83,7 +123,7 @@ public class Snake : MonoBehaviour
 
     public void Restart()
     {
-        SceneManager.LoadScene("SampleScene");
+        SceneManager.LoadScene("Game01");
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
@@ -112,8 +152,11 @@ public class Snake : MonoBehaviour
                 break;
 
             case "Speed":
-                speed -= speedUpgrade;
-                Destroy(collision.gameObject);
+                if (speed >= 0.02)
+                {
+                    speed -= speedUpgrade;
+                    Destroy(collision.gameObject);
+                }
                 break;
 
             case "Snake":
